@@ -2,6 +2,8 @@ import pandas as pd
 import mysql.connector
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+import pickle
 
 # ===========================================
 # 1. CONNECT TO MYSQL
@@ -9,27 +11,23 @@ from sklearn.linear_model import LinearRegression
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="root123",     # 🔴 CHANGE THIS
-    database="foodtracker"      # 🔴 CHANGE THIS
+    password="root123",
+    database="foodtracker"
 )
 
 # ===========================================
-# 2. LOAD DATA FROM SQL TABLE
+# 2. LOAD DATA
 # ===========================================
-query = "SELECT * FROM food_data"   # 🔴 CHANGE TABLE NAME
+query = "SELECT * FROM food_data"
 data = pd.read_sql(query, db)
 
-# Clean column names
 data.columns = data.columns.str.strip()
 
 print("\n📌 Data Loaded from SQL:")
 print(data.head())
 
-print("\nAvailable Columns in SQL Table:")
-print(list(data.columns))
-
 # ===========================================
-# 3. OPTIONAL COLUMN AUTO-RENAMING
+# 3. COLUMN STANDARDIZATION
 # ===========================================
 column_map = {
     'headcount': 'Headcount',
@@ -48,33 +46,37 @@ column_map = {
 
 data = data.rename(columns={old: new for old, new in column_map.items() if old in data.columns})
 
-print("\nColumns After Renaming:")
-print(list(data.columns))
-
 # ===========================================
-# 4. VALIDATION OF REQUIRED COLUMNS
+# 4. REQUIRED COLUMN CHECK
 # ===========================================
 required_cols = ['Headcount', 'Food_Consumed', 'Food_Wasted', 'Food_Prepared']
-
 for col in required_cols:
     if col not in data.columns:
-        raise ValueError(f"❌ ERROR: Missing column '{col}' in SQL table.")
+        raise ValueError(f"❌ Missing column: {col}")
 
 # ===========================================
-# 5. MODEL TRAINING
+# 5. TRAINING DATA
 # ===========================================
 X = data[['Headcount', 'Food_Consumed', 'Food_Wasted']]
 y = data['Food_Prepared']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# ===========================================
+# 6. FEATURE SCALING (VERY IMPORTANT)
+# ===========================================
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
 
 model = LinearRegression()
-model.fit(X_train, y_train)
+model.fit(X_train_scaled, y_train)
 
 print("\n✅ Model Training Complete!")
 
 # ===========================================
-# 6. PREDICTION INPUT
+# 7. USER INPUT
 # ===========================================
 print("\n---------------------------------------------")
 print("🍽 FOOD PREPARATION PREDICTION SYSTEM")
@@ -85,11 +87,24 @@ consumed = float(input("Enter today's food consumed (kg): "))
 wasted = float(input("Enter today's food wasted (kg): "))
 
 # ===========================================
-# 7. PREDICTION OUTPUT
+# 8. CORRECT PREDICTION METHOD
 # ===========================================
-prediction = model.predict([[headcount, consumed, wasted]])
+input_data = pd.DataFrame([{
+    "Headcount": headcount,
+    "Food_Consumed": consumed,
+    "Food_Wasted": wasted
+}])
 
-print(f"\n🍽 Recommended food to prepare for tomorrow: {prediction[0]:.2f} kg")
-import pickle
+input_scaled = scaler.transform(input_data)
+prediction = model.predict(input_scaled)
+
+# Prevent negative food values
+final_prediction = max(0, prediction[0])
+
+print(f"\n🍽 Recommended food to prepare for tomorrow: {final_prediction:.2f} kg")
+
+# ===========================================
+# 9. SAVE MODEL & SCALER
+# ===========================================
 pickle.dump(model, open("model.pkl", "wb"))
-
+pickle.dump(scaler, open("scaler.pkl", "wb"))

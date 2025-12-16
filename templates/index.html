@@ -1,43 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Food Requirement Predictor</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Desk</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #ffffff;
+      color: #111;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 60px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .logo-box {
+      width: 28px;
+      height: 28px;
+      background: #000;
+      border-radius: 6px;
+    }
+
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #555;
+      font-size: 14px;
+    }
+
+    nav a:hover {
+      color: #000;
+    }
+
+    .Predict-btn {
+      background: #000;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* HERO */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 80px 60px;
+      gap: 40px;
+    }
+
+    .hero-text {
+      max-width: 500px;
+    }
+
+    .hero-text h1 {
+      font-size: 42px;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .hero-text p {
+      color: #666;
+      line-height: 1.6;
+      font-size: 15px;
+      margin-bottom: 25px;
+    }
+
+    .start-btn {
+      background: #000;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* HERO IMAGE CARD */
+    .hero-image {
+      position: relative;
+      width: 420px;
+    }
+
+    .hero-image img {
+      width: 100%;
+      border-radius: 14px;
+    }
+
+    .card {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: #fff;
+      padding: 18px;
+      border-radius: 12px;
+      width: 260px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      font-size: 13px;
+    }
+
+    .card h4 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      background: #000;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+    }
+
+    .guests {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .note {
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .make-btn {
+      width: 100%;
+      background: #f4f4f4;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* HOW IT WORKS */
+    .works {
+      text-align: center;
+      padding: 80px 60px;
+    }
+
+    .works h2 {
+      font-size: 24px;
+      margin-bottom: 50px;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+    }
+
+    .step {
+      max-width: 220px;
+      font-size: 14px;
+    }
+
+    .icon {
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+
+    .step h3 {
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .step p {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid #eee;
+      padding: 30px 60px;
+      font-size: 12px;
+      color: #777;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .footer-links a {
+      margin-left: 15px;
+      text-decoration: none;
+      color: #777;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .saved {
+      color: #2e7d32;
+      font-weight: 500;
+    }
+  </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-<div class="container mt-5">
-    <div class="card shadow-lg p-4">
-        <h2 class="text-center mb-4">🍽 Food Requirement Predictor</h2>
-
-        <form action="/predict" method="POST">
-            <div class="mb-3">
-                <label class="form-label">Headcount</label>
-                <input type="number" class="form-control" name="headcount" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Consumed Food (kg)</label>
-                <input type="number" step="0.01" class="form-control" name="consumed" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Wasted Food (kg)</label>
-                <input type="number" step="0.01" class="form-control" name="wasted" required>
-            </div>
-
-            <button class="btn btn-primary w-100">Predict</button>
-        </form>
-
-        {% if prediction %}
-        <div class="alert alert-info mt-4 text-center">
-            <h4>{{ prediction }}</h4>
-        </div>
-        {% endif %}
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo">
+      <div class="logo-box"></div>
+      Smart Desk
     </div>
-</div>
+
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">How it Works</a>
+      <a href="#">Insights</a>
+      <a href="#">About</a>
+    </nav>
+
+    <a href="prediction.html"
+        ><button class="Predict-btn">Get Prediction</button></a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Intelligent food planning<br>for smarter kitchens</h1>
+      <p>
+        Eliminate guesswork. Our AI predicts exactly how much food to prepare
+        based on your headcount and history, saving costs and the planet.
+      </p>
+      <button class="start-btn">Start Planning</button>
+    </div>
+
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1504754524776-8f4f37790ca0" alt="Kitchen" />
+
+      <div class="card">
+        <h4>Dinner Event <span class="badge">High Confidence</span></h4>
+        <p class="guests">25 Guests</p>
+        <p class="note">Pasta Station Recommendation</p>
+        <button class="make-btn">Make 4.2 kg (approx 4 trays)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="works">
+    <h2>How Smart Desk Works</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="icon">📄</div>
+        <h3>Input Event Details</h3>
+        <p>Enter your headcount, event type, and any past data you have available.</p>
+      </div>
+
+      <div class="step">
+        <div class="icon">⚙️</div>
+        <h3>Get Smart Predictions</h3>
+        <p>Our algorithm calculates the optimal amount of food to prepare.</p>
+      </div>
+
+      <div class="step">
+        <div class="icon">🔽</div>
+        <h3>Reduce Waste & Cost</h3>
+        <p>Minimize leftovers, track efficiency, and save money.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <strong>Smart Desk</strong>
+      <div class="footer-links">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Features</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 Smart Desk. All rights reserved.</span>
+    </div>
+  </footer>
 
 </body>
 </html>
